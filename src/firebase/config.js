@@ -4,13 +4,12 @@ import { getAuth } from 'firebase/auth';
 
 // Firebase configuration
 const firebaseConfig = {
-  // These are demo/development values - replace with your actual Firebase config
-  apiKey: "demo-api-key",
-  authDomain: "french-bac-game.firebaseapp.com",
-  projectId: "french-bac-game",
-  storageBucket: "french-bac-game.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456"
+  apiKey: "AIzaSyCxYlHs-LtENGH9qHDjxLepdWhtN5p_2gU",
+  authDomain: "back-to-bac-579b7.firebaseapp.com",
+  projectId: "back-to-bac",
+  storageBucket: "back-to-bac.firebasestorage.app",
+  messagingSenderId: "163549846532",
+  appId: "1:163549846532:web:8ee65504271f016ac66951"
 };
 
 // Initialize Firebase
