@@ -8,7 +8,9 @@ const RoundResults = ({
   categories, 
   answers, 
   onNextRound,
-  calculateScores 
+  calculateScores,
+  isMultiplayer = false,
+  isHost = false
 }) => {
   const [scoredPlayers, setScoredPlayers] = useState([]);
 
@@ -30,7 +32,7 @@ const RoundResults = ({
 
     // Calculate scores for display
     const scored = players.map(player => {
-      const playerAnswers = answers[player.name] || {};
+      const playerAnswers = isMultiplayer ? answers[player.id] || {} : answers[player.name] || {};
       let roundScore = 0;
       let wordsFound = 0;
       let uniqueWords = 0;
@@ -90,7 +92,7 @@ const RoundResults = ({
     });
 
     setScoredPlayers(scored.sort((a, b) => b.roundScore - a.roundScore));
-  }, [players, answers, categories]);
+  }, [players, answers, categories, isMultiplayer]);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -103,13 +105,18 @@ const RoundResults = ({
           <div className="text-4xl font-bold text-indigo-600 mb-2">
             Lettre : {currentLetter}
           </div>
+          {isMultiplayer && (
+            <div className="text-sm text-gray-600">
+              Partie multijoueur • {players.length} joueurs
+            </div>
+          )}
         </div>
       </div>
 
       {/* Results for each player */}
       <div className="space-y-6 mb-6">
         {scoredPlayers.map((player, index) => (
-          <div key={player.name} className="bg-white rounded-lg shadow-lg p-6">
+          <div key={isMultiplayer ? player.id : player.name} className="bg-white rounded-lg shadow-lg p-6">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
@@ -121,6 +128,7 @@ const RoundResults = ({
                 </div>
                 <h3 className="text-xl font-semibold text-gray-800">
                   {player.name}
+                  {isMultiplayer && player.isHost && ' 👑'}
                 </h3>
               </div>
               <div className="text-right">
@@ -181,12 +189,27 @@ const RoundResults = ({
 
       {/* Next round button */}
       <div className="text-center">
-        <button
-          onClick={onNextRound}
-          className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          {currentRound >= totalRounds ? 'Voir les résultats finaux' : 'Manche suivante'}
-        </button>
+        {isMultiplayer ? (
+          isHost ? (
+            <button
+              onClick={onNextRound}
+              className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              {currentRound >= totalRounds ? 'Voir les résultats finaux' : 'Manche suivante'}
+            </button>
+          ) : (
+            <div className="px-8 py-3 bg-gray-300 text-gray-600 font-semibold rounded-lg">
+              En attente de l'hôte...
+            </div>
+          )
+        ) : (
+          <button
+            onClick={onNextRound}
+            className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            {currentRound >= totalRounds ? 'Voir les résultats finaux' : 'Manche suivante'}
+          </button>
+        )}
       </div>
     </div>
   );
