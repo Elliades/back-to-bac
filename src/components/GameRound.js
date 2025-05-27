@@ -16,15 +16,23 @@ const GameRound = ({
 
   // Initialize answers for all players
   useEffect(() => {
-    const initialAnswers = {};
-    players.forEach(player => {
-      initialAnswers[player.name] = {};
-      categories.forEach(category => {
-        initialAnswers[player.name][category] = '';
+    if (players && players.length > 0 && categories && categories.length > 0) {
+      const initialAnswers = {};
+      players.forEach(player => {
+        initialAnswers[player.name] = {};
+        categories.forEach(category => {
+          initialAnswers[player.name][category] = '';
+        });
       });
-    });
-    setAnswers(initialAnswers);
+      setAnswers(initialAnswers);
+    }
   }, [players, categories]);
+
+  // Reset timer when duration changes
+  useEffect(() => {
+    setTimeLeft(duration);
+    setIsGameActive(true);
+  }, [duration]);
 
   const handleFinishRound = useCallback(() => {
     setIsGameActive(false);
@@ -38,7 +46,7 @@ const GameRound = ({
         setTimeLeft(timeLeft - 1);
       }, 1000);
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0) {
+    } else if (timeLeft === 0 && isGameActive) {
       handleFinishRound();
     }
   }, [timeLeft, isGameActive, handleFinishRound]);
@@ -71,7 +79,19 @@ const GameRound = ({
     }
   };
 
+  // Safety checks
+  if (!players || players.length === 0) {
+    return <div className="text-center text-red-600">Erreur: Aucun joueur trouvé</div>;
+  }
+
+  if (!categories || categories.length === 0) {
+    return <div className="text-center text-red-600">Erreur: Aucune catégorie trouvée</div>;
+  }
+
   const currentPlayer = players[currentPlayerIndex];
+  if (!currentPlayer) {
+    return <div className="text-center text-red-600">Erreur: Joueur non trouvé</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -157,7 +177,7 @@ const GameRound = ({
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex justify-between items-center">
           <div className="text-sm text-gray-600">
-            {Object.values(answers[currentPlayer.name] || {}).filter(answer => answer.trim() !== '').length} / {categories.length} catégories remplies
+            {Object.values(answers[currentPlayer.name] || {}).filter(answer => answer && answer.trim() !== '').length} / {categories.length} catégories remplies
           </div>
           
           <button

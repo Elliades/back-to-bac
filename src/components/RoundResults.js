@@ -15,14 +15,18 @@ const RoundResults = ({
 
   useEffect(() => {
     // Calculate word frequencies
-    const allAnswers = Object.values(answers).flat();
-    const counts = {};
+    const allAnswers = [];
+    Object.values(answers).forEach(playerAnswers => {
+      Object.values(playerAnswers).forEach(word => {
+        if (word && word.trim()) {
+          allAnswers.push(word.toLowerCase().trim());
+        }
+      });
+    });
     
+    const counts = {};
     allAnswers.forEach(word => {
-      if (word && word.trim()) {
-        const normalizedWord = word.toLowerCase().trim();
-        counts[normalizedWord] = (counts[normalizedWord] || 0) + 1;
-      }
+      counts[word] = (counts[word] || 0) + 1;
     });
     
     setWordCounts(counts);
@@ -89,7 +93,7 @@ const RoundResults = ({
     });
 
     setScoredPlayers(scored.sort((a, b) => b.roundScore - a.roundScore));
-  }, [players, answers, categories, wordCounts]);
+  }, [players, answers, categories]);
 
   return (
     <div className="max-w-6xl mx-auto">

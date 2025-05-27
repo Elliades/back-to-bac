@@ -22,114 +22,145 @@ function App() {
   };
 
   const startGame = (playerNames, rounds, duration) => {
-    const initialPlayers = playerNames.map(name => ({
-      name,
-      totalScore: 0,
-      roundScores: []
-    }));
-    
-    setPlayers(initialPlayers);
-    setTotalRounds(rounds);
-    setRoundDuration(duration);
-    setCurrentRound(1);
-    setGameResults([]);
-    startNewRound();
+    try {
+      const initialPlayers = playerNames.map(name => ({
+        name,
+        totalScore: 0,
+        roundScores: []
+      }));
+      
+      setPlayers(initialPlayers);
+      setTotalRounds(rounds);
+      setRoundDuration(duration);
+      setCurrentRound(1);
+      setGameResults([]);
+      startNewRound();
+    } catch (error) {
+      console.error('Error starting game:', error);
+    }
   };
 
   const startNewRound = () => {
-    const letter = generateRandomLetter();
-    setCurrentLetter(letter);
-    setRoundAnswers({});
-    setGameState('playing');
+    try {
+      const letter = generateRandomLetter();
+      setCurrentLetter(letter);
+      setRoundAnswers({});
+      setGameState('playing');
+    } catch (error) {
+      console.error('Error starting new round:', error);
+    }
   };
 
   const finishRound = (answers) => {
-    setRoundAnswers(answers);
-    setGameState('roundResults');
+    try {
+      setRoundAnswers(answers || {});
+      setGameState('roundResults');
+    } catch (error) {
+      console.error('Error finishing round:', error);
+    }
   };
 
   const calculateScores = (answers) => {
-    const allAnswers = Object.values(answers).flat();
-    const wordCounts = {};
-    
-    // Count occurrences of each word
-    allAnswers.forEach(word => {
-      if (word && word.trim()) {
-        const normalizedWord = word.toLowerCase().trim();
-        wordCounts[normalizedWord] = (wordCounts[normalizedWord] || 0) + 1;
-      }
-    });
-
-    const updatedPlayers = players.map(player => {
-      const playerAnswers = answers[player.name] || {};
-      let roundScore = 0;
-      let wordsFound = 0;
-      let uniqueWords = 0;
-      let allCategoriesFilled = true;
-
-      CATEGORIES.forEach(category => {
-        const word = playerAnswers[category];
-        if (word && word.trim()) {
-          wordsFound++;
-          roundScore += 1; // 1 point per word
-          
-          const normalizedWord = word.toLowerCase().trim();
-          if (wordCounts[normalizedWord] === 1) {
-            uniqueWords++;
-            roundScore += 1; // 1 bonus for unique word
-          }
-        } else {
-          allCategoriesFilled = false;
+    try {
+      // Calculate word frequencies
+      const allAnswers = [];
+      Object.values(answers || {}).forEach(playerAnswers => {
+        if (playerAnswers && typeof playerAnswers === 'object') {
+          Object.values(playerAnswers).forEach(word => {
+            if (word && typeof word === 'string' && word.trim()) {
+              allAnswers.push(word.toLowerCase().trim());
+            }
+          });
         }
       });
-
-      // Bonus points
-      if (allCategoriesFilled) {
-        roundScore += 3; // 3 points bonus if all categories filled
-      }
       
-      if (uniqueWords === wordsFound && wordsFound === CATEGORIES.length) {
-        roundScore += 5; // 5 points if all words are unique
-      }
+      const wordCounts = {};
+      allAnswers.forEach(word => {
+        wordCounts[word] = (wordCounts[word] || 0) + 1;
+      });
 
-      return {
-        ...player,
-        totalScore: player.totalScore + roundScore,
-        roundScores: [...player.roundScores, roundScore]
-      };
-    });
+      const updatedPlayers = players.map(player => {
+        const playerAnswers = answers[player.name] || {};
+        let roundScore = 0;
+        let wordsFound = 0;
+        let uniqueWords = 0;
+        let allCategoriesFilled = true;
 
-    setPlayers(updatedPlayers);
-    return updatedPlayers;
+        CATEGORIES.forEach(category => {
+          const word = playerAnswers[category];
+          if (word && typeof word === 'string' && word.trim()) {
+            wordsFound++;
+            roundScore += 1; // 1 point per word
+            
+            const normalizedWord = word.toLowerCase().trim();
+            if (wordCounts[normalizedWord] === 1) {
+              uniqueWords++;
+              roundScore += 1; // 1 bonus for unique word
+            }
+          } else {
+            allCategoriesFilled = false;
+          }
+        });
+
+        // Bonus points
+        if (allCategoriesFilled) {
+          roundScore += 3; // 3 points bonus if all categories filled
+        }
+        
+        if (uniqueWords === wordsFound && wordsFound === CATEGORIES.length) {
+          roundScore += 5; // 5 points if all words are unique
+        }
+
+        return {
+          ...player,
+          totalScore: player.totalScore + roundScore,
+          roundScores: [...player.roundScores, roundScore]
+        };
+      });
+
+      setPlayers(updatedPlayers);
+      return updatedPlayers;
+    } catch (error) {
+      console.error('Error calculating scores:', error);
+      return players;
+    }
   };
 
   const nextRound = () => {
-    const updatedPlayers = calculateScores(roundAnswers);
-    
-    if (currentRound >= totalRounds) {
-      // Game finished
-      const finalResults = updatedPlayers
-        .sort((a, b) => b.totalScore - a.totalScore)
-        .map((player, index) => ({
-          ...player,
-          rank: index + 1
-        }));
+    try {
+      const updatedPlayers = calculateScores(roundAnswers);
       
-      setGameResults(finalResults);
-      setGameState('finalResults');
-    } else {
-      // Next round
-      setCurrentRound(currentRound + 1);
-      startNewRound();
+      if (currentRound >= totalRounds) {
+        // Game finished
+        const finalResults = updatedPlayers
+          .sort((a, b) => b.totalScore - a.totalScore)
+          .map((player, index) => ({
+            ...player,
+            rank: index + 1
+          }));
+        
+        setGameResults(finalResults);
+        setGameState('finalResults');
+      } else {
+        // Next round
+        setCurrentRound(currentRound + 1);
+        startNewRound();
+      }
+    } catch (error) {
+      console.error('Error proceeding to next round:', error);
     }
   };
 
   const restartGame = () => {
-    setGameState('setup');
-    setPlayers([]);
-    setCurrentRound(1);
-    setGameResults([]);
-    setRoundAnswers({});
+    try {
+      setGameState('setup');
+      setPlayers([]);
+      setCurrentRound(1);
+      setGameResults([]);
+      setRoundAnswers({});
+    } catch (error) {
+      console.error('Error restarting game:', error);
+    }
   };
 
   return (
