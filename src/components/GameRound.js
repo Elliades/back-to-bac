@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const GameRound = ({ 
   players, 
@@ -26,6 +26,11 @@ const GameRound = ({
     setAnswers(initialAnswers);
   }, [players, categories]);
 
+  const handleFinishRound = useCallback(() => {
+    setIsGameActive(false);
+    onFinishRound(answers);
+  }, [answers, onFinishRound]);
+
   // Timer countdown
   useEffect(() => {
     if (timeLeft > 0 && isGameActive) {
@@ -36,7 +41,7 @@ const GameRound = ({
     } else if (timeLeft === 0) {
       handleFinishRound();
     }
-  }, [timeLeft, isGameActive]);
+  }, [timeLeft, isGameActive, handleFinishRound]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -52,11 +57,6 @@ const GameRound = ({
         [category]: value
       }
     }));
-  };
-
-  const handleFinishRound = () => {
-    setIsGameActive(false);
-    onFinishRound(answers);
   };
 
   const nextPlayer = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import GameSetup from './components/GameSetup';
 import GameRound from './components/GameRound';
 import RoundResults from './components/RoundResults';
