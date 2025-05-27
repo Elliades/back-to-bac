@@ -11,7 +11,6 @@ const RoundResults = ({
   calculateScores 
 }) => {
   const [scoredPlayers, setScoredPlayers] = useState([]);
-  const [wordCounts, setWordCounts] = useState({});
 
   useEffect(() => {
     // Calculate word frequencies
@@ -28,8 +27,6 @@ const RoundResults = ({
     allAnswers.forEach(word => {
       counts[word] = (counts[word] || 0) + 1;
     });
-    
-    setWordCounts(counts);
 
     // Calculate scores for display
     const scored = players.map(player => {
