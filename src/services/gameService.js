@@ -1,7 +1,6 @@
 import { 
-  collection, 
   doc, 
-  addDoc, 
+  setDoc,
   updateDoc, 
   deleteDoc, 
   onSnapshot, 
@@ -18,6 +17,9 @@ export class GameService {
   // Create a new game room
   async createGame(hostName, gameSettings) {
     try {
+      // Generate a short game code
+      const gameCode = this.generateGameCode();
+      
       const gameData = {
         hostName,
         gameSettings: {
@@ -44,8 +46,11 @@ export class GameService {
         updatedAt: serverTimestamp()
       };
 
-      const docRef = await addDoc(collection(db, 'games'), gameData);
-      return { id: docRef.id, ...gameData };
+      // Use the game code as the document ID
+      const gameRef = doc(db, 'games', gameCode);
+      await setDoc(gameRef, gameData);
+      
+      return { id: gameCode, ...gameData };
     } catch (error) {
       console.error('Error creating game:', error);
       throw error;

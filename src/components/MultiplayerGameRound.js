@@ -22,6 +22,18 @@ const MultiplayerGameRound = ({
     }
   }, [currentPlayer, game.gameSettings.categories]);
 
+  const handleSubmitAnswers = useCallback(async () => {
+    if (isSubmitted) return;
+    
+    setIsSubmitted(true);
+    try {
+      await onSubmitAnswers(currentPlayer.id, answers);
+    } catch (error) {
+      console.error('Error submitting answers:', error);
+      setIsSubmitted(false);
+    }
+  }, [isSubmitted, currentPlayer.id, answers, onSubmitAnswers]);
+
   // Calculate time left based on round start time
   useEffect(() => {
     if (game.roundStartTime && game.gameSettings.roundDuration) {
@@ -60,18 +72,6 @@ const MultiplayerGameRound = ({
       }
     }
   }, [game.roundAnswers, game.players.length, onFinishRound]);
-
-  const handleSubmitAnswers = useCallback(async () => {
-    if (isSubmitted) return;
-    
-    setIsSubmitted(true);
-    try {
-      await onSubmitAnswers(currentPlayer.id, answers);
-    } catch (error) {
-      console.error('Error submitting answers:', error);
-      setIsSubmitted(false);
-    }
-  }, [isSubmitted, currentPlayer.id, answers, onSubmitAnswers]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
